@@ -1,3 +1,4 @@
+
 	.data
 headMsg:	.asciz	"Start av testprogram. Skriv in 5 tal!"
 endMsg:	.asciz	"Slut pa testprogram"
@@ -7,6 +8,7 @@ count:	.quad	0
 temp:	.quad	0
 
 	.text
+
 	.global	main
 main:
 	pushq	$0
@@ -26,7 +28,7 @@ l1:
 	call	setOutPos
 l2:
 	movq	temp,%rdx
-	add	%rdx,sum
+	add		%rdx,sum
 	movq	%rdx,%rdi
 	call	putInt
 	movq	$'+',%rdi
