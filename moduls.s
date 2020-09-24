@@ -1,4 +1,5 @@
     .data
+endOfText:   .asciz  "\0"
 buf:	    .space	64
 inbuf:      .space  64
 outbuf:     .space  64
@@ -26,141 +27,95 @@ outpos:     .quad   0
 
 inImage:
 # Done
-    movq $inbuf, %rdi
-    movq $64, %rsi
-    movq stdin, %rdx
-    call fgets
-    ret
+    movq    $inpos, 0  # Nollställ inpos
+    movq    $inbuf, %rdi        
+    movq    $5,%rsi             
+    movq    stdin, %rdx         
+    call    fgets
 
 getInt: 
-# Done, NOTE:all numbers are treated as positive ones 
-    pushq $0
+    # Rutinen ska tolka en sträng som börjar på aktuell buffertposition i inbufferten och fortsättatills ett tecken som inte kan ingå i ett heltal påträffas. 
+    # Den lästa substrängen översätts tillheltalsformat och returneras. 
+    # Positionen i bufferten ska vara det första tecken som inteingick i det lästa talet när rutinen lämnas. 
+    # Inledande blanktecken i talet ska vara tillåtna.
 
-    # movq $inbuf, %rdi
-
-    xor %rbx, %rbx
-    cmpq %rdi, 0
-    je inImage
-
-    cmpb $'0', (%rdi) 
-    # Check if number is ASCII for number between 0-9
-    jl lEnd
-    cmpb $'9', (%rdi)
-    movzbq (%rdi), %r10 # Mode 
-    imulq $10, %rax 
-    # Makes nmbr xxxx -> xxxx0
-    addq %r10, %rax 
-    # adds z to xxxx0 -> xxxxz
-    incq %rdi
-    
-    jmp getInt
-
-    popw %ax
+    ret
 
 getText: 
-    # rsi = max amount of chars to read from inbuf
-    # rdi = adress to copy string to
-    movq inbuf, %rdx
-    call fgets
 
     ret
-
-
-
-stackLoop:
-
-    xor %r10, %r10 # r10 acts as counter
-
-    jmp getChar
-    pushq %rax
-
-    add %r10, 1
-    cmp %r10, %rsi
-    jl stackLoop
-
-    ret
-
-
-buildLoop:
 
 getChar:
-    pushq %r11
-
-    movq $inpos, %r11
-    movq (%r11), %rax
-
-    incq %r11
-
-    movq %r11, inpos
-
-    popq %r11 
+   
 
     ret
 
 getInPos:
-    movq $inpos, %rax
 
     ret
 
 setInPos:  
-    movq %rbp, %rsp # saves stack pointer
-
-    pushq %r11
-
-    cmpq %rdi, 64
-    jge setMaxPos
-
-    cmpq %rdi, 0
-    jle setLowPos
-
-    movq $inbuf, %r11
-    movq (%r11), %rdi
-
-    movq %r11, inbuf 
-
-    popq %r11
-
+    
     ret
 
 setLowPos:
-    movq $0, inpos
 
     ret
 
 setMaxPos:    
-    movq $64, inpos
 
-    ret
-
-lEnd:
     ret
 
 # ------------------ UTMATNING ------------------
     
 
 outImage: 
-    pushq $0 
+    
     movq $outbuf, %rdi
     call printf
 
     xorq %rdi, %rdi
     movq %rdi, outbuf
 
+    ret
+
 putInt:
-    pushq $0 
-    popw %ax
+    
+    ret
 
 putText:
-    
+
+    # Rutinen ska lägga textsträngen som finns i buf från och med den aktuella positionen i utbufferten. 
+    # Glöm inte att uppdatera utbuffertens aktuella position innan rutinen lämnas.
+    # Om bufferten blir full så ska ett anrop till outImage göras, så att man får en tömd utbuffertatt jobba vidare mot.
+    # Parameter %rdi: adress som strängen ska hämtas till utbufferten ifrån (buf i texten)
+    pushq %rdi
+
+    movq $inbuf,%r11
+    movq (%rdi), %r10
+
+putTextLoop:
+    movq %r10, (%r11) 
+
+    incq %rdi
+    incq %r11
+
+    movq (%rdi), %r10
+
+    cmpq 0xFF, %r10
+    jne putTextLoop
+
+    popq %rdi
+    ret
 
 putChar:
-    pushq $0 
-    popw %ax
+
+    ret
 
 getOutPos:
-    pushq $0 
-    popw %ax
+
+    ret
 
 setOutPos:
-    pushq $0 
-    popw %ax
+
+    ret
