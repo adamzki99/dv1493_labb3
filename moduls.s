@@ -32,12 +32,12 @@ MAXPOS:     .quad   0
 # ------------------ INMATNING ------------------
 # inImage
 inImage:movq $inbuf, %rdi   # input gets stored in inbuf  
-    movq $64,%rsi           # max 63 chars     
+    movq $64,%rsi       # max 63 chars     
     movq stdin, %rdx         
     call fgets          # call for input
     leaq inbuf, %rdi    # load adress of inbuf to get the acctual "lenght" of the input
     xor %r10, %r10      # counter input for "length"
-getLen:incq %r10        # Add 1 to "length"
+getLen:incq %r10           # Add 1 to "length"
     incq %rdi
     movb (%rdi), %r11b
     cmpb %r11b, nul     # Nul terminated "string", so if nul we are at the end
@@ -47,7 +47,7 @@ getLen:incq %r10        # Add 1 to "length"
     call setInPosZero
     ret
 # getInt
-getInt:call checkInPos  # Are we at the end of the buffer?
+getInt:call checkInPos     # Are we at the end of the buffer?
     leaq inbuf, %rdi
     addq InPos, %rdi
     xor %rdx, %rdx
@@ -63,8 +63,8 @@ readSign:movb (%rdi), %dl
     je buildIntBegin
     cmpb $' ', %dl      # no number? 
     je noNumber
-    jmp buildIntLoop             # just a number means we can skip some routines 
-negativeInt:movq $1, %rsi        # "dirty bit" to remember if it is a negative number
+    jmp buildIntLoop    # just a number means we can skip some routines 
+negativeInt:movq $1, %rsi       # "dirty bit" to remember if it is a negative number
 buildIntBegin: incq %rdi         # if we arent looking at a number we move to the number
     incq InPos
 buildIntLoop:movb (%rdi), %dl 
@@ -142,7 +142,7 @@ outImage:  leaq outbuf, %rdi
     movq OutPos, %rdi
     addq OutPos, %rdi
     ret
-outputFormating: pushq %rdi # saving adress of outbuf to stack
+outputFormating: pushq %rdi              # saving adress of outbuf to stack
     movb nul, %r10b
     addq OutPos, %rdi       # moving to the end of the output
     movb %r10b, (%rdi)      # making end of the output to nul character
@@ -170,10 +170,10 @@ putIntStackLoop:xor %rdx, %rdx
     pushq %rdx              # pushes the remainder to stack
     incq %r11               # keeping track of the lenght of the int
     cmpq $0, %rax           # if rax is 0 all the didits are pushed on the stack
-    je makeNegative         # no more didgits means we can rebuild the int into outbuf
+    je makeNegative        # no more didgits means we can rebuild the int into outbuf
     jmp putIntStackLoop     # still didgits in the int    
 makeNegative:cmpq $0, %r9
-    je addToOutbufLoop      # if positive we can skip this step
+    je addToOutbufLoop          # if positive we can skip this step
     movb $'-', (%r10)
     incq %r10
     incq OutPos
@@ -186,7 +186,7 @@ addToOutbufLoop:xor %rdx, %rdx          # rdx = 0
     incq %r10               # move the outbuf pointer to the element before it
     incq OutPos
     decq %r11               # one less didgit has to be added
-    jmp addToOutbufLoop     
+    jmp addToOutbufLoop     # loop
 addToOutbufEnd:ret
 # putText
 putText: leaq outbuf, %r9
